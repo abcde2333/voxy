@@ -1,6 +1,7 @@
 name: check-does-build-pr
 
 on: [ pull_request ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,5 +21,14 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: Gradle build
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Gradle build
         run: ./gradlew build
+
+      - name: Upload mod artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mod-Jar
+          path: build/libs/*.jar

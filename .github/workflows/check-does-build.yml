@@ -1,6 +1,9 @@
 name: check-does-build
 
-on: [ push ]
+on: 
+  pull_request: 
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,18 +18,19 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Loom Cache
-        uses: actions/cache@v4
-        with:
-          path: "**/.gradle/loom-cache"
-          key: "${{ runner.os }}-gradle-${{ hashFiles('**/libs.versions.*', '**/*.gradle*', '**/gradle-wrapper.properties') }}"
-          restore-keys: "${{ runner.os }}-gradle-"
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-read-only: false
-          cache-cleanup: never
+          cache-read-only: true
 
-      - name: Gradle build
-        run: ./gradlew -I init.gradle build
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Run Gradle build
+        run: ./gradlew build
+
+      - name: Upload mod artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Mod-Jar
+          path: build/libs/*.jar
